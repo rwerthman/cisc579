@@ -10,8 +10,7 @@
 #include "inc/HAL_I2C.h"
 #include "inc/ISRs.h"
 #include "inc/main.h"
-
-#include "math.h"
+#include "inc/myNeuralNetwork.h"
 
 /* Utility functions */
 uint32_t mapValToRange(uint32_t x, uint32_t input_min, uint32_t input_max,
