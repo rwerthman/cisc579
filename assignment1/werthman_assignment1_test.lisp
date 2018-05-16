@@ -1,6 +1,4 @@
-; (change-directory "...")
-; (compile-file "werthman_assignment1_test.lisp" :load t)
-
+(change-directory "/Users/bobby/Desktop/cisc579/assignment1")
 (compile-file "werthman_assignment1.lisp" :load t)
 
 ; Test cases for the function LOOK
@@ -152,6 +150,19 @@
   (if (equal x '(ROBBIE IS DOWNSTAIRS IN THE KITCHEN))
     (print (format nil "PASS: MOVE returns ~a." x))
     (print (format nil "FAIL: MOVE returns ~a." x))
+  )
+)
+(print "")
+
+; Test cases for SEARCH
+; Help Robbie find a path from PANTRY to the KITCHEN thatpasses 
+; through the LIBRARY
+(print "TESTING FOR SEARCH")
+(print "Test case 1 for SEARCH")
+(let ((x (ROBBIESEARCH 'PANTRY 'KITCHEN 'LIBRARY)))
+  (if (equal x '(PANTRY DINING-ROOM DOWNSTAIRS-BEDROOM BACK-STAIRS LIBRARY UPSTAIRS-BEDROOM FRONT-STAIRS LIVING-ROOM KITCHEN))
+    (print (format nil "PASS: SEARCH returns ~a." x))
+    (print (format nil "FAIL: SEARCH returns ~a." x))
   )
 )
 (print "")

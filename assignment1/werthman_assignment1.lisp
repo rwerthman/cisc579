@@ -124,3 +124,38 @@
 
   )
 )
+
+;Adapt one of the search functions presented in class to help Robbie 
+;find a path from PANTRY to the KITCHEN thatpasses through the LIBRARY
+; I'm going to adapt branch and bound to this function
+(defun ROBBIESEARCH (source destination waypoint)
+  (branch source destination waypoint)
+)
+
+(defun branch (start finish waypoint)             ;similar to best, but queue sorted
+  (branch1 (list (list start)) finish waypoint))  ;based on path length
+
+(defun branch1 (queue finish waypoint)            ;helper fcn for branch
+  (cond ((null queue) nil)
+        ; We can only finish when our destination and waypoint are in the path
+        ((and (equal finish (caar queue)) (member waypoint (car queue))) (print queue)
+                                     (reverse (car queue)))
+        (t ;(print queue)
+           (branch1 (sort                ;new predicate used
+                      (append
+                         (expand (car queue)) (cdr queue))
+                      'shorterp)
+                    finish waypoint
+                    ))))
+
+(defun shorterp (p1 p2)                  ;check path lengths
+  (< (length p1) (length p2)))
+
+(defun expand (path)
+  (remove-if #'(lambda (path) (member (car path) (cdr path))) ;kill cycles
+               (mapcar #'(lambda (child) (cons child path))
+                         ; Get the children of each room in the ROOMS variable
+                         (apply 'append (mapcar #'(lambda (children) (car children) (cdr children)) (CHOICES (car path))))
+                )
+  )
+)
