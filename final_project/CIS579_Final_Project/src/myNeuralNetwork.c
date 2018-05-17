@@ -1,22 +1,27 @@
-/*
- * Mathmatical functions needed:
- *    Dot product
- *    Matrix Transpose
- *    Sigmoid -> activation function
- *
- *  Variables needed:
- *    Inputs -> array
- *    Outputs -> array
- *    Weights -> multidimensional array
- *    Error for each layer
- */
 #include "inc/myNeuralNetwork.h"
 
 #define num_outputs 3
-#define num_inputs 2
+#define num_inputs 3
 #define learning_rate 0.5
+#define num_training_samples 1000
 
-/* input is the x value of the bullet and x value of the spacecraft */
+//float training_data_input[9] = {
+//  {0, 1, 1}, // If alien is above spacecraft and there is no bullet coming drop bomb
+//  {1, 1, 1}, // If alien is above spacecraft and there is a bullet avoid it by moving left or right
+//  {1, 0, 1}, // If alien is above bullet move left or right
+//  {0, 0, 1}, // If alien isn't above anything move left or right
+//};
+//float traning_data_output[3] = {
+//  {0, 0, 1}, // Drop bomb
+//  {1, 0, 0}, // Move left
+//  {0, 1, 0}, // Move right
+//  {0, 1, 0}, // Move right
+//};
+
+
+
+
+/* input is the x value of the bullet, x value of alien, x value of the spacecraft */
 uint8_t input[num_inputs];
 
 /* output is the
@@ -44,7 +49,7 @@ void initialize_neural_network_weights()
 
 }
 
-void calculate_nueral_network_outputs(float outputs[])
+void calculate_nueral_network_outputs()
 {
   uint8_t i, j;
 
@@ -64,14 +69,79 @@ void calculate_nueral_network_outputs(float outputs[])
   }
 }
 
-void backpropagate_error_to_weights()
+void backpropagate_error_to_weights(float target_outputs[])
 {
+  uint8_t i, j;
+  float error[num_outputs];
+  // Calculate the error for each output error = (expected output - real output)
+  for (i = 0; i < num_outputs; i++)
+  {
+    error[i] = target_outputs[i] - output[i];
+
+    error[i] = error[i] * sigmoid_function(output[i]) * (1 - sigmoid_function(output[i]));
+  }
+
+  // Calculate dot product with the weight matrix transposed
+  for (i = 0; i < num_inputs; i++)
+  {
+    for (j = 0; j < num_outputs; j++)
+    {
+      weights_input_to_output[j][i] += learning_rate * error[j] * input[i];
+    }
+  }
 
 }
 
 float sigmoid_function(float x)
 {
   return 1/(1 + expf(-x));
+}
+
+void generate_training_data(float training_input[num_training_samples][num_inputs], float training_output[num_training_samples][num_outputs])
+{
+  uint16_t i;
+  uint8_t x, y, z;
+
+  // For the # of training samples
+  for (i = 0; i < 1000; i++)
+  {
+    // Randomly choose the x locations of the bullet, alien, and spacecraft
+    x = rand() % 127;
+    y = rand() % 127;
+    z = rand() % 127;
+
+    training_input[i][0] = x;
+    training_input[i][1] = y;
+    training_input[i][2] = z;
+
+    // Base on the training input decide what the alien should do
+    // x = bullet, y = spacecraft, z = alien
+    if (x == z)
+    {
+      // If bullet has same x as alien move alien
+      // Spaceship can move left or right
+      training_output[i][rand() % 2] = 1;
+    }
+    else if (z == y && x != z)
+    {
+      // If the alien is in the same x as spacecraft and bullet not in same x
+      // Alien drops bomb on spaceshipt
+      training_output[i][2] = 1;
+    }
+    else if (x == y && z == y)
+    {
+      // If the alien is in the same x as spacecraft and bullet in same x
+      // Move alien left or right
+      training_output[i][rand() % 2] = 1;
+    }
+    else if (z != x && z != y)
+    {
+      // If the alien is not above anything move left or right
+      training_output[i][rand() % 2] = 1;
+    }
+
+  }
+
 }
 
 
