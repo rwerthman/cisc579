@@ -126,6 +126,9 @@ void drawBullets(void)
      /* Reset previous button state to be ready for the next button press */
      previousFireButtonState = GPIO_INPUT_PIN_HIGH;
      /* Generate PWM for the buzzer when shooting */
+     Timer_A_setCompareValue(TIMER_A2_BASE,
+                             TIMER_A_CAPTURECOMPARE_REGISTER_2,
+                             60000/2);
      Timer_A_setOutputMode(TIMER_A2_BASE,
                            TIMER_A_CAPTURECOMPARE_REGISTER_2,
                            TIMER_A_OUTPUTMODE_RESET_SET);
@@ -160,7 +163,7 @@ void drawBullets(void)
      {
        /* Stop the PWM for the explosions */
        Timer_A_setOutputMode(TIMER_A2_BASE,
-                             TIMER_A_CAPTURECOMPARE_REGISTER_1,
+                             TIMER_A_CAPTURECOMPARE_REGISTER_2,
                              TIMER_A_OUTPUTMODE_RESET);
        pwmExplosionCounter = 4;
      }
@@ -229,8 +232,11 @@ void drawBullets(void)
             explosions[j][enabled] = 1;
             explosions[j][direction] = 1;
             /* Generate PWM for the buzzer to make a sound of an explosion */
+            Timer_A_setCompareValue(TIMER_A2_BASE,
+                                    TIMER_A_CAPTURECOMPARE_REGISTER_2,
+                                    60000/4);
             Timer_A_setOutputMode(TIMER_A2_BASE,
-                                  TIMER_A_CAPTURECOMPARE_REGISTER_1,
+                                  TIMER_A_CAPTURECOMPARE_REGISTER_2,
                                   TIMER_A_OUTPUTMODE_RESET_SET);
             pwmExplosionCounter = 0;
             /* Clear the aliens position */
@@ -416,9 +422,9 @@ void drawAliens(void)
 void drawBombs(void)
 {
   uint8_t i;
-  /* Interrupt should fire every 10ms so count up to 1 second
+  /* Interrupt should fire every 100ms so count up to 1 second
    * before firing another bomb.  So bombs are fired every 1 second */
-  if (bombTimerCounter > 99)
+  if (bombTimerCounter > 19)
   {
     bombTimerCounter = 0;
     if (bombs[currentBomb][x] == 200 && bombs[currentBomb][y] == 200)
@@ -440,7 +446,7 @@ void drawBombs(void)
   }
   else
   {
-    bombTimerCounter++; /* Count up to a 100 (1 second) before shooting a bomb */
+    bombTimerCounter++; /* Count up to a 20 (1 second) before shooting a bomb */
     for (i = 0; i < NUM_BOMBS; i++)
     {
       /* Draw the bombs if they aren't equal to their default values */
@@ -507,8 +513,11 @@ void drawBombs(void)
             explosions[3][direction] = 1;
 
             /* Generate PWM for the buzzer to make a sound of an explosion */
+            Timer_A_setCompareValue(TIMER_A2_BASE,
+                                    TIMER_A_CAPTURECOMPARE_REGISTER_2,
+                                    60000/4);
             Timer_A_setOutputMode(TIMER_A2_BASE,
-                                  TIMER_A_CAPTURECOMPARE_REGISTER_1,
+                                  TIMER_A_CAPTURECOMPARE_REGISTER_2,
                                   TIMER_A_OUTPUTMODE_RESET_SET);
             pwmExplosionCounter = 0;
 

@@ -19,6 +19,6 @@ void initGPIO(void)
   GPIO_enableInterrupt ( GPIO_PORT_P1, GPIO_PIN1 );
 
   /* Enable backlight pin for pwm adjustment */
-  GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4);
+  //GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4);
 }
 

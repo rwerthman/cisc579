@@ -10,7 +10,7 @@ void initTimers(void)
   {
     TIMER_A_CLOCKSOURCE_ACLK, // 32 KHz clock => Period is .031 milliseconds
     TIMER_A_CLOCKSOURCE_DIVIDER_1,
-    320,
+    3200/2,
     TIMER_A_TAIE_INTERRUPT_DISABLE,
     TIMER_A_CCIE_CCR0_INTERRUPT_DISABLE,
     TIMER_A_DO_CLEAR,
@@ -22,7 +22,8 @@ void initTimers(void)
   {
     TIMER_A_CAPTURECOMPARE_REGISTER_1,
     TIMER_A_CAPTURECOMPARE_INTERRUPT_ENABLE,
-    TIMER_A_OUTPUTMODE_SET_RESET, 320, // Counted up to in 10 milliseconds (.1 second) with a 32 KHz clock
+    TIMER_A_OUTPUTMODE_SET_RESET,
+    3200/2, // Counted up to in 50 milliseconds with a 32 KHz clock
   };
   Timer_A_initCompareMode(TIMER_A0_BASE, &compareParam1);
 
@@ -32,7 +33,7 @@ void initTimers(void)
     TIMER_A_CAPTURECOMPARE_REGISTER_2,
     TIMER_A_CAPTURECOMPARE_INTERRUPT_ENABLE,
     TIMER_A_OUTPUTMODE_SET_RESET,
-    320, // Counted up to in 10 milliseconds (.1 second) with a 32 KHz clock
+    3200/2, // Counted up to in 50 milliseconds (.1 second) with a 32 KHz clock
   };
   Timer_A_initCompareMode(TIMER_A0_BASE, &compareParam2);
 
@@ -49,7 +50,7 @@ void initTimers(void)
     {
      TIMER_A_CLOCKSOURCE_ACLK, // 32 KHz clock => Period is .031 milliseconds
      TIMER_A_CLOCKSOURCE_DIVIDER_1,
-     320, // 10 milliseconds
+     3200/2, // 100 milliseconds
      TIMER_A_TAIE_INTERRUPT_DISABLE,
      TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE,
      TIMER_A_DO_CLEAR,
@@ -63,7 +64,7 @@ void initTimers(void)
        TIMER_A_CAPTURECOMPARE_REGISTER_1,
        TIMER_A_CAPTURECOMPARE_INTERRUPT_ENABLE,
        TIMER_A_OUTPUTMODE_SET_RESET,
-       320, // 10 milliseconds
+       3200/2, // 100 milliseconds
     };
     Timer_A_initCompareMode(TIMER_A1_BASE, &compareParamA1_1);
 
@@ -73,7 +74,7 @@ void initTimers(void)
       TIMER_A_CAPTURECOMPARE_REGISTER_2,
       TIMER_A_CAPTURECOMPARE_INTERRUPT_ENABLE,
       TIMER_A_OUTPUTMODE_SET_RESET,
-      320, // 10 milliseconds
+      3200/2, // 100 milliseconds
     };
     Timer_A_initCompareMode(TIMER_A1_BASE, &compareParamA1_2);
 
