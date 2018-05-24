@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 
-#define NUM_ALIENS (uint8_t)3
+#define NUM_ALIENS (uint8_t)1
 #define NUM_EXPLOSIONS (uint8_t)4
-#define NUM_BULLETS (uint8_t)10
-#define NUM_BOMBS (uint8_t)6
+#define NUM_BULLETS (uint8_t)1
+#define NUM_BOMBS (uint8_t)1
 
 /* Spacecraft globals */
 extern uint32_t spacecraftPosition[2];

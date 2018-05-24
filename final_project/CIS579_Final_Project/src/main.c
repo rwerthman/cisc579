@@ -56,6 +56,10 @@ void main(void)
   Init_I2C_GPIO();
   I2C_init();
 
+  /* Initialize neural network */
+  initialize_neural_network_weights();
+  generate_training_data(500);
+
   // Globally enable interrupts
   __bis_SR_register(GIE);
 
@@ -337,8 +341,13 @@ void drawExplosions(void)
 
 void drawAliens(void)
 {
+  float inputs[3];
+  float outputs[3];
+  float max_value;
+  uint8_t max_index;
+
   /* Draw the aliens */
-  uint8_t i;
+  uint8_t i, j;
   for (i = 0; i < NUM_ALIENS ; i++)
   {
     /* If the aliens aren't dead... */
@@ -351,58 +360,101 @@ void drawAliens(void)
       alienRect.yMin = previousAliens[i][y] - 2;
       Graphics_fillRectangleOnDisplay(g_sContext.display, &alienRect,
                                       g_sContext.background);
-      /* Keep the aliens on the screen */
-      /* Alien is moving to the right almost off the screen */
-      if (aliens[i][x] > 125 && previousAliens[i][x] < aliens[i][x])
+
+      inputs[0] = bullets[0][x];
+      inputs[1] = aliens[0][x];
+      inputs[2] = spacecraftPosition[x];
+
+      calculate_neural_network_outputs(outputs, inputs);
+
+      max_value = outputs[0];
+      max_index = 0;
+      /* Find the index with the highest value.
+       * This tells us what the Alien should do next.
+       */
+      for (j = 0; j < 3; j++)
       {
-        previousAliens[i][x] = aliens[i][x];
-        aliens[i][x]--;
+        if (outputs[j] > max_value)
+        {
+          max_value = outputs[j];
+          max_index = j;
+        }
       }
-      /* Alien is moving to the left almost off the screen */
-      else if (aliens[i][x] < 2 && previousAliens[i][x] > aliens[i][x])
+
+      if (max_index == 0)
       {
+        // Move the alien to the left
         previousAliens[i][x] = aliens[i][x];
         aliens[i][x]++;
       }
-      /* Alien is just moving to the right */
-      else if (aliens[i][x] > previousAliens[i][x])
+      else if(max_index == 1)
       {
-        /* Keep alien moving to the right */
-        previousAliens[i][x] = aliens[i][x];
-        aliens[i][x]++;
-      }
-      /* Alien is just moving to the left */
-      else if (aliens[i][x] < previousAliens[i][x])
-      {
-        /* Keep alien moving to the left */
+        // Move the alien to the right
         previousAliens[i][x] = aliens[i][x];
         aliens[i][x]--;
       }
-      /* Alien hasn't started moving */
-      else if (aliens[i][x] == previousAliens[i][x])
+      else if(max_index == 2)
       {
-        /* Choose a direction based on i */
-        if (i % 2)
-        {
-          // To the right
-          previousAliens[i][x] = aliens[i][x];
-          aliens[i][x]++;
-        }
-        else
-        {
-          // To the left
-          previousAliens[i][x] = aliens[i][x];
-          aliens[i][x]--;
-        }
+        // Drop bomb
       }
       else
       {
-        /* This shouldn't be reached.
-         * There shouldn't be any other way for the alien
-         * to move.
-         */
-        while (1);
+        // Should not be reached
+        while(1);
       }
+
+      /* Keep the aliens on the screen */
+      /* Alien is moving to the right almost off the screen */
+//      if (aliens[i][x] > 125 && previousAliens[i][x] < aliens[i][x])
+//      {
+//        previousAliens[i][x] = aliens[i][x];
+//        aliens[i][x]--;
+//      }
+//      /* Alien is moving to the left almost off the screen */
+//      else if (aliens[i][x] < 2 && previousAliens[i][x] > aliens[i][x])
+//      {
+//        previousAliens[i][x] = aliens[i][x];
+//        aliens[i][x]++;
+//      }
+//      /* Alien is just moving to the right */
+//      else if (aliens[i][x] > previousAliens[i][x])
+//      {
+//        /* Keep alien moving to the right */
+//        previousAliens[i][x] = aliens[i][x];
+//        aliens[i][x]++;
+//      }
+//      /* Alien is just moving to the left */
+//      else if (aliens[i][x] < previousAliens[i][x])
+//      {
+//        /* Keep alien moving to the left */
+//        previousAliens[i][x] = aliens[i][x];
+//        aliens[i][x]--;
+//      }
+//      /* Alien hasn't started moving */
+//      else if (aliens[i][x] == previousAliens[i][x])
+//      {
+//        /* Choose a direction based on i */
+//        if (i % 2)
+//        {
+//          // To the right
+//          previousAliens[i][x] = aliens[i][x];
+//          aliens[i][x]++;
+//        }
+//        else
+//        {
+//          // To the left
+//          previousAliens[i][x] = aliens[i][x];
+//          aliens[i][x]--;
+//        }
+//      }
+//      else
+//      {
+//        /* This shouldn't be reached.
+//         * There shouldn't be any other way for the alien
+//         * to move.
+//         */
+//        while (1);
+//      }
       /* Draw the alien at its new position */
       alienRect.xMax = aliens[i][x] + 2;
       alienRect.xMin = aliens[i][x] - 2;
