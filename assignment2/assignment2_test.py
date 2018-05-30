@@ -19,7 +19,18 @@ class Test(unittest.TestCase):
         self.assertIsNone(result)
     
     def testBranchAndBoundART(self):
-        pass
+        result = solveWithBranchAndBound(['A', 'R', 'T', '-', '-', '-'], ['-', '-', '-', 'T', 'A', 'R'])
+        self.assertEqual(result,
+                         [
+                             ['A', 'R', 'T', '-', '-', '-'], 
+                             ['A', 'R', '-', 'T', '-', '-'], 
+                             ['A', '-', 'R', 'T', '-', '-'], 
+                             ['A', '-', '-', 'T', 'R', '-'], 
+                             ['-', 'A', '-', 'T', 'R', '-'], 
+                             ['-', 'A', '-', 'T', '-', 'R'], 
+                             ['-', '-', 'A', 'T', '-', 'R'], 
+                             ['-', '-', '-', 'T', 'A', 'R']
+                        ])
     
     def testBranchAndBoundNO(self):
         result = solveWithBranchAndBound(['N', 'O', '-', '-'], ['O', 'N', '-', '-'])
@@ -33,14 +44,14 @@ class Test(unittest.TestCase):
         result = expandElementsChildren(['A', 'R', 'T', '-', '-', '-'])
         self.assertListEqual(result, 
         [
-            [
-                ['A', 'R', '-', 'T', '-', '-'], ['A', 'R', 'T', '-', '-', '-']
-            ], 
-            [
-                ['A', '-', 'T', 'R', '-', '-'], ['A', 'R', 'T', '-', '-', '-']
-            ]
+            ['A', '-', 'T', 'R', '-', '-'],
+            ['A', 'R', '-', 'T', '-', '-'] 
         ])
 
+    def testBranchAndBoundCooper(self):
+        result = solveWithBranchAndBound(['w', 'e', 'r', '-', '-', '-'], ['w', '-', '-', '-', 'e', 'r'])
+        print result
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
