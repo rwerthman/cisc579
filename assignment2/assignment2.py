@@ -83,7 +83,7 @@ def heuristicEstimateofDistanceToGoal(currentState, finalState):
                         # For example, '-r-t-a' and '---art'
                         # return a number that is higher than the # of possible moves
                         # which indicates this is not a good path to follow
-                        return (len(currentState)*2)
+                        return (len(currentState)^2)
 
     return totalDistanceToGoal
 
