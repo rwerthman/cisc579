@@ -1,4 +1,5 @@
 import copy
+from Tkconstants import CURRENT
 
 def expandElementsChildren(queueElement):
     '''
@@ -42,7 +43,42 @@ def removeDuplicates(queueOfPartialPaths):
         if path not in queueOfPartialPathsWithoutDuplicates:
             queueOfPartialPathsWithoutDuplicates.append(path)
     return queueOfPartialPathsWithoutDuplicates
-    
+
+def heuristicEstimateofDistanceToGoal(currentState, finalState):
+    totalDistanceToGoal = 0
+    # Start from the end of the current state
+    for i, currentStateCharacter in reversed (list(enumerate(currentState))):
+        if currentStateCharacter == '-':
+            # Do nothing since we won't move - characters
+            pass
+        else:   
+            for j, finalStateCharacter in enumerate(finalState):
+                # if the characters are the same and the current state characters 
+                # is not passed where it should be
+                if currentStateCharacter == finalStateCharacter and i <= j:
+                    # If we can move the character to an empty space
+                    if currentState[j] == '-':
+                        # Track the number of moves we have made
+                        totalDistanceToGoal += (j - i)
+                        # Remove the character from the final state so
+                        # so we can keep track of duplicates
+                        tempListFinalState = list(finalState)
+                        tempListFinalState[j] = '-'
+                        finalState = ''.join(tempListFinalState)
+                        
+                        tempListCurrentState = list(currentState)
+                        tempListCurrentState[i] = '-'
+                        currentState = ''.join(tempListCurrentState)
+                        break
+                    # If the character in the currentState is already in the right position
+                    elif currentState[j] == finalState[j]:
+                        break
+                    else:
+                        # We know the current state will never lead to the final state
+                        # For example, '-r-t-a' and '---art'
+                        return -1
+
+    return totalDistanceToGoal
 
 '''
 A*
@@ -73,6 +109,7 @@ def solveWithAStar(initialState, finalState):
             # Reverse the path before returning it so that it goes 
             # initial state -> final state
             # return result[::-1]
+            print 'A* path solution', result
             return True
         else:
             # Remove the first queue element
@@ -86,14 +123,19 @@ def solveWithAStar(initialState, finalState):
                 copyOfFirstList.insert(0, child)
                 queueOfPartialPaths.insert(0, copyOfFirstList)
             
-            #sort the queue of partial paths by distance traveled plus the estimate of distance to goal
-            queueOfPartialPaths.sort(key=len)
+            # sort the queue of partial paths by distance traveled plus the estimate of distance to goal
+            # queueOfPartialPaths.sort(key=len)
+            queueOfPartialPaths = sortWithDistanceTravelledAndHeuristic(queueOfPartialPaths, finalState)
             
             # remove redundant paths
             queueOfPartialPaths = removeDuplicates(queueOfPartialPaths)             
             
     # return None
     return False
+
+def sortWithDistanceTravelledAndHeuristic(queueOfPartialPaths, finalState):
+    queueOfPartialPaths.sort(key = lambda x: len(x) + heuristicEstimateofDistanceToGoal(x[0], finalState))
+    return queueOfPartialPaths
 
 '''
 Branch and Bound
