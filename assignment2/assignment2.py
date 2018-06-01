@@ -54,9 +54,10 @@ def heuristicEstimateofDistanceToGoal(currentState, finalState):
         else:   
             for j, finalStateCharacter in enumerate(finalState):
                 # if the characters are the same and the current state characters 
-                # is not passed where it should be
+                # is not passed where it should be compared to the final state
                 if currentStateCharacter == finalStateCharacter and i <= j:
-                    # If we can move the character to an empty space
+                    # If it is possible to move the character to a position in the current state
+                    # where it should be in the final state
                     if currentState[j] == '-':
                         # Track the number of moves we have made
                         totalDistanceToGoal += (j - i)
@@ -66,17 +67,23 @@ def heuristicEstimateofDistanceToGoal(currentState, finalState):
                         tempListFinalState[j] = '-'
                         finalState = ''.join(tempListFinalState)
                         
+                        # Remove the character from the current state
+                        # so we keep track of duplicates
                         tempListCurrentState = list(currentState)
                         tempListCurrentState[i] = '-'
                         currentState = ''.join(tempListCurrentState)
                         break
-                    # If the character in the currentState is already in the right position
+                    # If the character in the currentState is already in the same
+                    # position that it is in the final state don't add any
+                    # distance to it
                     elif currentState[j] == finalState[j]:
                         break
                     else:
                         # We know the current state will never lead to the final state
                         # For example, '-r-t-a' and '---art'
-                        return -1
+                        # return a number that is higher than the # of possible moves
+                        # which indicates this is not a good path to follow
+                        return (len(currentState)*2)
 
     return totalDistanceToGoal
 
