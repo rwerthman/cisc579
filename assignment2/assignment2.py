@@ -1,9 +1,8 @@
 import copy
-from Tkconstants import CURRENT
 
 def expandElementsChildren(queueElement):
     '''
-    Return the children of a state of the list string
+    Return the children of a state (queueElement)
     '''
     queueElement = list(queueElement)
     elementsChildren = []
@@ -28,7 +27,8 @@ def expandElementsChildren(queueElement):
                 elementsChildren.append("".join(copyQueueElement))
                 
             # if we can jump a letter to the right like checkers
-            elif (index + 2) is not len(queueElement) and queueElement[index + 2] is '-':
+            elif ((index + 2) is not len(queueElement) and 
+                  queueElement[index + 2] is '-'):
                 # Jump the letter to the right of the current letter
                 copyQueueElement[index + 2] = copyQueueElement[index]
                 copyQueueElement[index] = '-'
@@ -38,6 +38,9 @@ def expandElementsChildren(queueElement):
     return elementsChildren
 
 def removeDuplicates(queueOfPartialPaths):
+    '''
+    Removes duplicate lists that have elements the same order
+    '''
     queueOfPartialPathsWithoutDuplicates = []
     for path in queueOfPartialPaths:
         if path not in queueOfPartialPathsWithoutDuplicates:
@@ -45,64 +48,73 @@ def removeDuplicates(queueOfPartialPaths):
     return queueOfPartialPathsWithoutDuplicates
 
 def heuristicEstimateofDistanceToGoal(currentState, finalState):
+    '''
+    Estimates the distance from the current state to the final state
+    '''
     totalDistanceToGoal = 0
-    # Start from the end of the current state
-    for i, currentStateCharacter in reversed (list(enumerate(currentState))):
+    # Iterate backwards from the end of the current state
+    for i, currentStateCharacter in reversed(
+        list(enumerate(currentState))):
         if currentStateCharacter == '-':
             # Do nothing since we won't move - characters
             pass
         else:   
-            for j, finalStateCharacter in enumerate(finalState):
-                # if the characters are the same and the current state characters 
-                # is not passed where it should be compared to the final state
-                if currentStateCharacter == finalStateCharacter and i <= j:
-                    # If it is possible to move the character to a position in the current state
-                    # where it should be in the final state
-                    if currentState[j] == '-':
-                        # Track the number of moves we have made
-                        totalDistanceToGoal += (j - i)
-                        # Remove the character from the final state so
-                        # so we can keep track of duplicates
-                        tempListFinalState = list(finalState)
-                        tempListFinalState[j] = '-'
-                        finalState = ''.join(tempListFinalState)
-                        
-                        # Remove the character from the current state
-                        # so we keep track of duplicates
-                        tempListCurrentState = list(currentState)
-                        tempListCurrentState[i] = '-'
-                        currentState = ''.join(tempListCurrentState)
-                        break
-                    # If the character in the currentState is already in the same
-                    # position that it is in the final state don't add any
-                    # distance to it
-                    elif currentState[j] == finalState[j]:
-                        break
+            for j, finalStateCharacter in reversed(
+                list(enumerate(finalState))):
+                # if the characters are the same and the current 
+                # state characters are still in valid positions
+                # according to the constraints
+                if currentStateCharacter == finalStateCharacter:
+                    if i <= j:
+                        # If the character in the currentState is 
+                        # already in the right position
+                        if currentState[j] == finalState[j]:
+                            # Remove the character from the final state 
+                            # so we can keep track of duplicates
+                            tempListFinalState = list(finalState)
+                            tempListFinalState[j] = '-'
+                            finalState = ''.join(tempListFinalState)
+                            break
+                        else:
+                            # Track the number of moves we have to
+                            # make to move the character to the right
+                            # position
+                            totalDistanceToGoal += (j - i)
+                            # Remove the character from the final state 
+                            # so we can keep track of duplicates
+                            tempListFinalState = list(finalState)
+                            tempListFinalState[j] = '-'
+                            finalState = ''.join(tempListFinalState)
+                            break
                     else:
-                        # We know the current state will never lead to the final state
+                        # We know the current state will never lead to 
+                        # the final state because the characters can't
+                        # move to the left
                         # For example, '-r-t-a' and '---art'
-                        # return a number that is higher than the # of possible moves
-                        # which indicates this is not a good path to follow
-                        return (len(currentState)^2)
+                        # Return a large number indicating this is
+                        # a bad state
+                        return (len(finalState) * len(finalState))
 
     return totalDistanceToGoal
 
-'''
-A*
-
-Add root to queue of partial paths
-Until queue is empty or goal is attained
-    If first queue element equals the goal then  do nothing
-    Else 
-        remove the first queue element
-        add its children to the front of the queue of the partial paths
-        sort the queue of partial paths by distance traveled plus the estimate of distance to goal
-        remove redundant paths
-If goal is attained then announce success
-'''
 def solveWithAStar(initialState, finalState):
+    '''
+    A*
+    
+    Add root to queue of partial paths
+    Until queue is empty or goal is attained
+        If first queue element equals the goal then  do nothing
+        Else 
+            remove the first queue element
+            add its children to the front of the queue of the partial paths
+            sort the queue of partial paths by distance traveled plus the estimate of distance to goal
+            remove redundant paths
+    If goal is attained then announce success
+    
+    Function returns true if there is a path to the final state
+    from the initial state, false if there isn't a path
+    '''
     if len(initialState) < 3:
-        #return None
         return False
     # Add root to queue of partial paths
     queueOfPartialPaths = [[initialState]]
@@ -116,15 +128,21 @@ def solveWithAStar(initialState, finalState):
             # Reverse the path before returning it so that it goes 
             # initial state -> final state
             # return result[::-1]
-            print 'A* path solution', result
+            print 'A*: Path solution', result[::-1]
+            print 'A*: Size of queue of partial paths', len(queueOfPartialPaths)
             return True
         else:
             # Remove the first queue element
             firstList = queueOfPartialPaths.pop(0)
             firstElement = firstList[0]
+#             if debugAStar: print 'First element', firstElement
+#             if debugAStar: print 'Heuristic cost of first element', heuristicEstimateofDistanceToGoal(firstElement, finalState)
+#             if debugAStar: print 'Length of first path', len(firstList)
             
             # Adds its children to the front of the queue of the partial paths
             firstElementsChildren = expandElementsChildren(firstElement)
+#             if debugAStar: print 'First elements children', firstElementsChildren
+                
             for child in firstElementsChildren:
                 copyOfFirstList = copy.deepcopy(firstList)
                 copyOfFirstList.insert(0, child)
@@ -141,24 +159,42 @@ def solveWithAStar(initialState, finalState):
     return False
 
 def sortWithDistanceTravelledAndHeuristic(queueOfPartialPaths, finalState):
+    '''
+    Sort the queue of partial paths by the length of the paths
+    and the hueristic of the most recent state
+    '''
     queueOfPartialPaths.sort(key = lambda x: len(x) + heuristicEstimateofDistanceToGoal(x[0], finalState))
     return queueOfPartialPaths
 
-'''
-Branch and Bound
+def timingWrapper(func, initialState, finalState):
+    '''
+    Create a wrapper function that we can send to timeit
+    because timeit only excepts functions
+    with no arguments but our functions we want to time
+    have arguments
+    '''
+    def timingWrapped():
+        return func(initialState, finalState)
+    return timingWrapped
 
-Add root to queue of partial paths
-Until queue is empty or goal is attained
-    If first queue element equals the goal then do nothing
-    Else
-        remove the first queue element
-        add its children to the front of the queue of the partial paths
-        sort the queue of partial paths by distance traveled
-If goal is attained then announce success
-'''
 def solveWithBranchAndBound(initialState, finalState):
+    '''
+    Branch and Bound
+    
+    Add root to queue of partial paths
+    Until queue is empty or goal is attained
+        If first queue element equals the goal then do nothing
+        Else
+            remove the first queue element
+            add its children to the front of the queue of the partial paths
+            sort the queue of partial paths by distance traveled
+    If goal is attained then announce success
+    
+    Function returns true if there is a path to the final state
+    from the initial state, false if there isn't a path
+    '''
     if len(initialState) < 3:
-        return None
+        return False
     
     # Add root to queue of partial paths
     queueOfPartialPaths = [[initialState]]
@@ -171,7 +207,9 @@ def solveWithBranchAndBound(initialState, finalState):
             result = queueOfPartialPaths[0]
             # Reverse the path before returning it so that it goes 
             # initial state -> final state
-            return result[::-1]
+            print 'Branch and Bound: Path solution', result[::-1]
+            print 'Branch and Bound: Size of queue of partial paths', len(queueOfPartialPaths)
+            return True
         else:
             # Remove the first queue element
             firstList = queueOfPartialPaths.pop(0)
@@ -187,7 +225,7 @@ def solveWithBranchAndBound(initialState, finalState):
             #Sort the queue of partial paths by distance traveled
             queueOfPartialPaths.sort(key=len)
             
-    return None
+    return False
 
 if __name__ == '__main__':
     pass
