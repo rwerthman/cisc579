@@ -58,7 +58,7 @@ void main(void)
 
   /* Initialize neural network */
   initialize_neural_network_weights();
-  generate_training_data(500);
+  generate_training_data(5000);
 
   // Globally enable interrupts
   __bis_SR_register(GIE);
@@ -341,7 +341,7 @@ void drawExplosions(void)
 
 void drawAliens(void)
 {
-  float inputs[3];
+  uint8_t inputs[3];
   float outputs[3];
   float max_value;
   uint8_t max_index;
@@ -360,6 +360,10 @@ void drawAliens(void)
       alienRect.yMin = previousAliens[i][y] - 2;
       Graphics_fillRectangleOnDisplay(g_sContext.display, &alienRect,
                                       g_sContext.background);
+      /* Reset the outputs */
+      outputs[0] = 0.0;
+      outputs[1] = 0.0;
+      outputs[2] = 0.0;
 
       inputs[0] = bullets[0][x];
       inputs[1] = aliens[0][x];
@@ -370,9 +374,8 @@ void drawAliens(void)
       max_value = outputs[0];
       max_index = 0;
       /* Find the index with the highest value.
-       * This tells us what the Alien should do next.
-       */
-      for (j = 0; j < 3; j++)
+       * This tells us what the Alien should do next. */
+      for (j = 0; j < num_outputs; j++)
       {
         if (outputs[j] > max_value)
         {
@@ -385,17 +388,31 @@ void drawAliens(void)
       {
         // Move the alien to the left
         previousAliens[i][x] = aliens[i][x];
-        aliens[i][x]++;
+        if (aliens[i][x] > 1)
+        {
+          aliens[i][x]--;
+        }
+        else
+        {
+          /* Don't move the alien off the screen */
+        }
       }
-      else if(max_index == 1)
+      else if (max_index == 1)
       {
         // Move the alien to the right
         previousAliens[i][x] = aliens[i][x];
-        aliens[i][x]--;
+        if (aliens[i][x] < 127)
+        {
+          aliens[i][x]++;
+        }
+        else
+        {
+          /* Don't move the alien off the screen */
+        }
       }
-      else if(max_index == 2)
+      else if (max_index == 2)
       {
-        // Drop bomb
+        /* Don't move the alien */
       }
       else
       {

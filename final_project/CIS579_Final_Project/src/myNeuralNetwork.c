@@ -1,7 +1,5 @@
 #include "inc/myNeuralNetwork.h"
 
-#define num_outputs 3
-#define num_inputs 3
 #define learning_rate 0.5
 
 //float training_data_input[9] = {
@@ -48,7 +46,7 @@ void initialize_neural_network_weights()
 
 }
 
-void calculate_neural_network_outputs(float output[], uint8_t input[])
+void calculate_neural_network_outputs(float output[num_outputs], uint8_t input[num_inputs])
 {
   uint8_t i, j;
 
@@ -68,7 +66,7 @@ void calculate_neural_network_outputs(float output[], uint8_t input[])
   }
 }
 
-void backpropagate_error_to_weights(uint8_t input[], float output[], uint8_t target_outputs[])
+void backpropagate_error_to_weights(uint8_t input[num_inputs], float output[num_outputs], uint8_t target_outputs[num_outputs])
 {
   uint8_t i, j;
   float error[num_outputs];
@@ -99,11 +97,11 @@ float sigmoid_function(float x)
 void generate_training_data(uint16_t num_training_samples)
 {
   uint16_t i;
-  uint8_t x, y, z;
+  uint8_t x, y, z, j;
 
-  uint8_t training_input[3];
-  uint8_t training_output[3];
-  float real_output[3];
+  uint8_t training_input[num_inputs];
+  uint8_t training_output[num_outputs];
+  float real_output[num_outputs];
 
   // For the # of training samples
   for (i = 0; i < num_training_samples; i++)
@@ -117,30 +115,33 @@ void generate_training_data(uint16_t num_training_samples)
     training_input[1] = y;
     training_input[2] = z;
 
+    training_output[0] = 0;
+    training_output[1] = 0;
+    training_output[2] = 0;
+
+    real_output[0] = 0;
+    real_output[1] = 0;
+    real_output[2] = 0;
+
     // Base on the training input decide what the alien should do
     // x = bullet, y = spacecraft, z = alien
     if (x == z)
     {
-      // If bullet has same x as alien move alien
-      // Spaceship can move left or right
+      // If bullet has same x as alien move alien so the bullet doesn't
+      // hit it
+      // Alien can move left or right
       training_output[rand() % 2] = 1;
     }
-    else if (z == y && x != z)
+    else if (x == y)
     {
-      // If the alien is in the same x as spacecraft and bullet not in same x
-      // Alien drops bomb on spaceshipt
-      training_output[2] = 1;
-    }
-    else if (x == y && z == y)
-    {
-      // If the alien is in the same x as spacecraft and bullet in same x
+      // If the alien is in the same x as spacecraft
       // Move alien left or right
       training_output[rand() % 2] = 1;
     }
-    else if (z != x && z != y)
+    else
     {
-      // If the alien is not above anything move left or right
-      training_output[rand() % 2] = 1;
+      // If the alien is not above anything don't move
+      training_output[2] = 1;
     }
 
     calculate_neural_network_outputs(real_output, training_input);
