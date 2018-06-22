@@ -30,6 +30,8 @@ Graphics_Rectangle bombRect;
 void main(void)
 {
 
+  uint8_t i;
+
   // Stop the watchdog timer
   WDT_A_hold(WDT_A_BASE);
 
@@ -58,7 +60,10 @@ void main(void)
 
   /* Initialize neural network */
   initialize_neural_network_weights();
-  generate_training_data(5000);
+  for (i = 0; i < 3; i++)
+  {
+    generate_training_data(50000);
+  }
 
   // Globally enable interrupts
   __bis_SR_register(GIE);
@@ -108,8 +113,7 @@ void drawBullets(void)
      previousBullets[currentBullet][x] = bullets[currentBullet][x];
      previousBullets[currentBullet][y] = bullets[currentBullet][y];
      /* Set the bullet to the position of the spacecraft when
-      * it was fired.
-      */
+      * it was fired. */
      bullets[currentBullet][x] = spacecraftPosition[x];
      /* Subtract from the spacecraft position so the bullet looks like it is ahead of the
       * spacecraft when we shoot it and also we don't
@@ -117,9 +121,8 @@ void drawBullets(void)
       */
      bullets[currentBullet][y] = spacecraftPosition[y] - 5;
      /* Advance to the next bullet or back to 0 if there isn't
-      * another bullet
-      */
-     if (currentBullet < NUM_BULLETS)
+      * another bullet */
+     if (currentBullet < (NUM_BULLETS - 1))
      {
        currentBullet++;
      }
@@ -341,8 +344,8 @@ void drawExplosions(void)
 
 void drawAliens(void)
 {
-  uint8_t inputs[3];
-  float outputs[3];
+  uint8_t inputs[num_inputs];
+  float outputs[num_outputs];
   float max_value;
   uint8_t max_index;
 
@@ -362,8 +365,6 @@ void drawAliens(void)
                                       g_sContext.background);
       /* Reset the outputs */
       outputs[0] = 0.0;
-      outputs[1] = 0.0;
-      outputs[2] = 0.0;
 
       inputs[0] = bullets[0][x];
       inputs[1] = aliens[0][x];
@@ -371,23 +372,27 @@ void drawAliens(void)
 
       calculate_neural_network_outputs(outputs, inputs);
 
-      max_value = outputs[0];
-      max_index = 0;
       /* Find the index with the highest value.
-       * This tells us what the Alien should do next. */
-      for (j = 0; j < num_outputs; j++)
-      {
-        if (outputs[j] > max_value)
-        {
-          max_value = outputs[j];
-          max_index = j;
-        }
-      }
+       * This tells us what the neural network predicted
+       * and what the Alien should do next. */
+//      max_value = outputs[0];
+//      max_index = 0;
+//      for (j = 0; j < num_outputs; j++)
+//      {
+//        if (outputs[j] > max_value)
+//        {
+//          max_value = outputs[j];
+//          max_index = j;
+//        }
+//      }
 
-      if (max_index == 0)
+      /* Move the alien left */
+      if (outputs[0] > .5)
       {
         // Move the alien to the left
         previousAliens[i][x] = aliens[i][x];
+        /* If we aren't about to move off of the screen
+         * continue moving the alien */
         if (aliens[i][x] > 1)
         {
           aliens[i][x]--;
@@ -397,10 +402,13 @@ void drawAliens(void)
           /* Don't move the alien off the screen */
         }
       }
-      else if (max_index == 1)
+      /* Move the alien right */
+      else if (outputs[0] <= .5)
       {
         // Move the alien to the right
         previousAliens[i][x] = aliens[i][x];
+        /* If we aren't about to move off of the screen
+         * continue moving the alien */
         if (aliens[i][x] < 127)
         {
           aliens[i][x]++;
@@ -410,68 +418,12 @@ void drawAliens(void)
           /* Don't move the alien off the screen */
         }
       }
-      else if (max_index == 2)
-      {
-        /* Don't move the alien */
-      }
       else
       {
         // Should not be reached
         while(1);
       }
 
-      /* Keep the aliens on the screen */
-      /* Alien is moving to the right almost off the screen */
-//      if (aliens[i][x] > 125 && previousAliens[i][x] < aliens[i][x])
-//      {
-//        previousAliens[i][x] = aliens[i][x];
-//        aliens[i][x]--;
-//      }
-//      /* Alien is moving to the left almost off the screen */
-//      else if (aliens[i][x] < 2 && previousAliens[i][x] > aliens[i][x])
-//      {
-//        previousAliens[i][x] = aliens[i][x];
-//        aliens[i][x]++;
-//      }
-//      /* Alien is just moving to the right */
-//      else if (aliens[i][x] > previousAliens[i][x])
-//      {
-//        /* Keep alien moving to the right */
-//        previousAliens[i][x] = aliens[i][x];
-//        aliens[i][x]++;
-//      }
-//      /* Alien is just moving to the left */
-//      else if (aliens[i][x] < previousAliens[i][x])
-//      {
-//        /* Keep alien moving to the left */
-//        previousAliens[i][x] = aliens[i][x];
-//        aliens[i][x]--;
-//      }
-//      /* Alien hasn't started moving */
-//      else if (aliens[i][x] == previousAliens[i][x])
-//      {
-//        /* Choose a direction based on i */
-//        if (i % 2)
-//        {
-//          // To the right
-//          previousAliens[i][x] = aliens[i][x];
-//          aliens[i][x]++;
-//        }
-//        else
-//        {
-//          // To the left
-//          previousAliens[i][x] = aliens[i][x];
-//          aliens[i][x]--;
-//        }
-//      }
-//      else
-//      {
-//        /* This shouldn't be reached.
-//         * There shouldn't be any other way for the alien
-//         * to move.
-//         */
-//        while (1);
-//      }
       /* Draw the alien at its new position */
       alienRect.xMax = aliens[i][x] + 2;
       alienRect.xMin = aliens[i][x] - 2;

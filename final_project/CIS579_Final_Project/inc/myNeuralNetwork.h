@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include "math.h"
 
-#define num_outputs 3
-#define num_inputs 3
+#define num_outputs 1 // Number of output nodes
+#define num_hidden 3 // Number of hidden layer nodes
+#define num_inputs 3 // Number of input nodes
 
 void initialize_neural_network_weights();
 void calculate_neural_network_outputs(float output[num_outputs], uint8_t input[num_inputs]);
